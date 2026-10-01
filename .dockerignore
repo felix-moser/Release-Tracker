@@ -1,0 +1,63 @@
+# Version control
+.git
+.gitignore
+
+# Python
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache
+.mypy_cache
+.ruff_cache
+.coverage
+htmlcov/
+.venv
+venv
+ENV
+env
+
+# Node (frontend has its own install inside the build stage)
+frontend/node_modules
+node_modules
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+*~
+
+# Database & runtime data (should be mounted as a volume)
+*.db
+*.sqlite
+*.sqlite3
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Build output (rebuilt inside Docker)
+frontend/dist
+dist
+dist-ssr
+backend/target
+
+# Docker
+Dockerfile
+docker-compose.yml
+docker-compose*.yml
+
+# Docs
+*.md
+!requirements.txt
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Misc
+uv.lock
+package-lock.json

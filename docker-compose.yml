@@ -1,0 +1,12 @@
+services:
+  project-neptune-java:
+    image: ghcr.io/felix-moser/release-tracker:latest
+    container_name: project-neptune-java
+    network_mode: host
+    volumes:
+      # Persist SQLite database across container restarts
+      - ./data:/app/data
+    environment:
+      - DB_PATH=/app/data/releases.db
+
+    restart: unless-stopped
