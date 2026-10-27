@@ -7,6 +7,9 @@ import com.felixcasa.backendjava.response.TicketTemplateResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -15,6 +18,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -111,6 +115,42 @@ public class JiraServiceTest {
         assertThat(fields).containsEntry("priority", Map.of("name", "High"));
         assertThat((String) fields.get("duedate")).isEqualTo(LocalDate.now().plusDays(3).toString());
         assertThat(fields).containsEntry("labels", List.of("bug", "backend"));
+    }
+
+    @ParameterizedTest
+    @MethodSource("releaseLinks")
+    void buildIssuePayloadShouldUseReleaseLinkInSummaryAndDescription(String url, String expectedUrl) {
+        TicketTemplateResponse template = new TicketTemplateResponse(
+                "template1", "PROJ", "Bug", "Release {url}", "See {url}",
+                "", "", "", "", ""
+        );
+
+        Map<String, Object> payload = jiraService.buildIssuePayload(template, "my-repo", "v1.0", url);
+        Map<String, Object> fields = (Map<String, Object>) payload.get("fields");
+
+        assertThat(fields.get("summary")).isEqualTo("Release " + expectedUrl);
+        assertThat(fields.get("description")).isEqualTo(Map.of(
+                "version", 1,
+                "type", "doc",
+                "content", List.of(Map.of(
+                        "type", "paragraph",
+                        "content", List.of(Map.of("type", "text", "text", "See " + expectedUrl))))));
+    }
+
+    static Stream<Arguments> releaseLinks() {
+        return Stream.of(
+                Arguments.of("https://api.github.com/repos/owner/my-repo/releases/latest",
+                        "https://github.com/owner/my-repo/releases/latest"),
+                Arguments.of("https://github.com/owner/my-repo/releases/latest",
+                        "https://github.com/owner/my-repo/releases/latest"),
+                Arguments.of("http://url", "http://url"),
+                Arguments.of("https://api.github.com/repos/owner/my-repo/releases/123",
+                        "https://api.github.com/repos/owner/my-repo/releases/123"),
+                Arguments.of("https://api.github.com.example/repos/owner/my-repo/releases/latest",
+                        "https://api.github.com.example/repos/owner/my-repo/releases/latest"),
+                Arguments.of("", ""),
+                Arguments.of(null, "")
+        );
     }
 
     @Test

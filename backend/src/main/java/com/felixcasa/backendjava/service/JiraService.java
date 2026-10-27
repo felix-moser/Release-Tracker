@@ -70,10 +70,19 @@ public class JiraService {
         );
     }
 
+    private String toGithubReleaseWebUrl(String url) {
+        if (url == null) {
+            return "";
+        }
+        return url.replaceFirst(
+                "^https://api\\.github\\.com/repos/([^/?#]+)/([^/?#]+)/releases/latest$",
+                "https://github.com/$1/$2/releases/latest");
+    }
+
     public Map<String, Object> buildIssuePayload(TicketTemplateResponse template, String repo, String tag, String url) {
         String repoStr = repo == null ? "" : repo;
         String tagStr = tag == null ? "" : tag;
-        String urlStr = url == null ? "" : url;
+        String urlStr = toGithubReleaseWebUrl(url);
 
         String summary = template.summary()
                 .replace("{repo}", repoStr)
