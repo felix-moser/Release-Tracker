@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../api';
+import RegistryCredentials from '../components/RegistryCredentials';
 import { Button, Input, Card } from '../components/ui';
 
 export default function SettingsView() {
@@ -198,12 +199,14 @@ export default function SettingsView() {
               </div>
 
               <div className="flex mt-sm">
-                <Button variant="primary" type="submit" disabled={savingSecrets || touchedSecrets.size === 0}>
+                <Button variant="primary-sm" type="submit" disabled={savingSecrets || touchedSecrets.size === 0}>
                   {savingSecrets ? 'Saving...' : 'Update Credentials'}
                 </Button>
               </div>
             </form>
           </Card>
+
+          <RegistryCredentials />
 
           {/* Scheduler Configuration */}
           <Card>
@@ -230,7 +233,7 @@ export default function SettingsView() {
                 />
               </div>
               <div className="flex mt-sm">
-                <Button variant="primary" type="submit" disabled={saving}>
+                <Button variant="primary-sm" type="submit" disabled={saving}>
                   {saving ? 'Saving...' : 'Save Changes'}
                 </Button>
               </div>

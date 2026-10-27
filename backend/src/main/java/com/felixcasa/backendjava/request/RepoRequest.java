@@ -8,8 +8,13 @@ public record RepoRequest(
         @NotEmpty String name,
         @NotEmpty @JsonProperty("github_url") String githubUrl,
         String template,
-        @JsonProperty("version_comparison") VersionComparisonMode versionComparison
+        @JsonProperty("version_comparison") VersionComparisonMode versionComparison,
+        @JsonProperty("docker_image") String dockerImage,
+        @JsonProperty("docker_template") String dockerTemplate
 ) {
+    public RepoRequest(String name, String githubUrl, String template, VersionComparisonMode mode) {
+        this(name, githubUrl, template, mode, null, null);
+    }
     public RepoRequest {
         if (versionComparison == null) {
             versionComparison = VersionComparisonMode.ANY_DIFFERENT;

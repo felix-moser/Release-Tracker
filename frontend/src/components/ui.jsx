@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
-export function Button({ variant = 'primary', className = '', children, ...props }) {
+export function Button({ variant = 'primary-sm', className = '', children, ...props }) {
   const baseClass = {
     primary: 'button-primary',
     secondary: 'button-secondary',
     'primary-sm': 'button-primary-sm',
     'ghost-sm': 'button-ghost-sm',
     danger: 'button-danger'
-  }[variant] || 'button-primary';
+  }[variant] || 'button-primary-sm';
   
   return (
     <button className={`${baseClass} ${className}`} {...props}>
@@ -65,7 +65,7 @@ export function NavBar() {
     <nav className="nav-bar">
       <div className="flex items-center justify-between" style={{ width: '100%' }}>
         <Link to="/" className="flex items-center gap-xs" style={{ textDecoration: 'none' }}>
-          <img src="/neptune_logo.jpg" alt="release-tracker Logo" style={{ height: '32px', width: '32px', borderRadius: '4px' }} />
+          <img src="/neptune_logo.jpg" alt="release-tracker Logo" style={{ height: '32px', width: '32px', borderRadius: 'var(--rounded-sm)' }} />
           <span className="heading-md" style={{ letterSpacing: '-0.8px' }}>Release Tracker</span>
         </Link>
         <button 
@@ -91,11 +91,11 @@ export function Hero() {
     <div className="hero-band flex-col items-center justify-center">
       <h1 className="display-xl mb-md">Release Tracking, Simplified</h1>
       <p className="body-lg" style={{ maxWidth: '600px', margin: '0 auto', color: 'var(--colors-body)' }}>
-        Track your GitHub repository releases and automatically create Jira tickets using custom templates.
+        Track GitHub releases and Docker images, and automatically create Jira tickets using custom templates.
       </p>
       <div className="hero-buttons">
-        <Link to="/repos"><Button variant="primary">View Repositories</Button></Link>
-        <Link to="/templates"><Button variant="secondary">Manage Templates</Button></Link>
+        <Link to="/repos" className="button-primary">View Repositories</Link>
+        <Link to="/templates" className="button-secondary">Manage Templates</Link>
       </div>
     </div>
   );
@@ -108,7 +108,7 @@ export function Footer() {
         <div className="flex items-center gap-xs text-mute">
           <span className="mono-eyebrow">release-tracker</span>
         </div>
-        <div className="flex gap-md text-sm text-mute">
+        <div className="flex gap-md body-sm text-mute">
           <a href="https://github.com/felix-moser/Release-Tracker" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: 'inherit' }}>GitHub</a>
         </div>
       </div>

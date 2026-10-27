@@ -33,7 +33,7 @@ export default function OnboardingView({ onComplete }) {
   };
 
   return (
-    <div className="flex-col items-center justify-center" style={{ minHeight: '100vh', backgroundColor: 'var(--colors-canvas)' }}>
+    <div className="flex-col items-center justify-center" style={{ minHeight: '100vh', padding: 'var(--spacing-md)', backgroundColor: 'var(--colors-canvas)' }}>
       <Card elevated className="w-full" style={{ maxWidth: '480px', padding: 'var(--spacing-xl)' }}>
         <div className="text-center mb-xl">
           <h1 className="heading-lg mb-sm">Welcome to Release Tracker</h1>
@@ -41,7 +41,7 @@ export default function OnboardingView({ onComplete }) {
         </div>
 
         {error && (
-          <div className="mb-md p-sm" style={{ backgroundColor: '#fee', color: 'var(--colors-error)', borderRadius: 'var(--rounded-sm)' }}>
+          <div role="alert" className="mb-md body-sm" style={{ color: 'var(--colors-error)' }}>
             {error}
           </div>
         )}
@@ -93,7 +93,7 @@ export default function OnboardingView({ onComplete }) {
             <p className="body-sm text-mute mt-xs" style={{marginTop: '4px'}}>Required if you are tracking private repositories or hitting rate limits.</p>
           </div>
 
-          <Button variant="primary" type="submit" disabled={loading} className="mt-md" style={{ width: '100%', padding: '12px 14px' }}>
+          <Button variant="primary" type="submit" disabled={loading} className="mt-md">
             {loading ? 'Saving...' : 'Save & Continue'}
           </Button>
         </form>

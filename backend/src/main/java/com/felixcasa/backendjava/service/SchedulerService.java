@@ -45,7 +45,7 @@ public class SchedulerService implements SchedulingConfigurer {
         taskRegistrar.addTriggerTask(
             () -> {
                 try {
-                    logger.debug("Starting scheduled check cycle for all repositories");
+                    logger.debug("Starting scheduled check cycle for repositories and Docker images");
                     repoService.checkAllRepos();
                     logger.debug("Finished scheduled check cycle");
                 } catch (Exception e) {

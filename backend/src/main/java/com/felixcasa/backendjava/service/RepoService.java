@@ -1,6 +1,9 @@
 package com.felixcasa.backendjava.service;
 
 import com.felixcasa.backendjava.client.GithubClient;
+import com.felixcasa.backendjava.client.DockerRegistryClient;
+import com.felixcasa.backendjava.repository.DockerImageRepository;
+import org.springframework.transaction.annotation.Transactional;
 import com.felixcasa.backendjava.exception.RepoNotFoundException;
 import com.felixcasa.backendjava.repository.RepoRepository;
 import com.felixcasa.backendjava.request.RepoRequest;
@@ -15,6 +18,9 @@ import org.springframework.web.server.ResponseStatusException;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 
 @Service
 public class RepoService {
@@ -22,14 +28,21 @@ public class RepoService {
     private final GithubClient githubClient;
     private final SystemService systemService;
     private final JiraService jiraService;
+    private final DockerRegistryClient dockerRegistryClient;
+    private final DockerImageRepository dockerImages;
+    private final Object checkCycleLock = new Object();
+    private CompletableFuture<List<CheckRepoResultResponse>> activeCheckCycle;
 
-    public RepoService(RepoRepository repoRepository, GithubClient githubClient, SystemService systemService, JiraService jiraService) {
+    public RepoService(RepoRepository repoRepository, GithubClient githubClient, SystemService systemService, JiraService jiraService, DockerRegistryClient dockerRegistryClient, DockerImageRepository dockerImages) {
         this.repoRepository = repoRepository;
         this.githubClient = githubClient;
         this.systemService = systemService;
         this.jiraService = jiraService;
+        this.dockerRegistryClient = dockerRegistryClient;
+        this.dockerImages = dockerImages;
     }
 
+    @Transactional
     public RepositoryResponse createRepo(RepoRequest repoRequest) {
         String correctUrl = getReleaseApiUrl(repoRequest.githubUrl());
 
@@ -60,6 +73,7 @@ public class RepoService {
             );
         }
 
+        saveLinkedImage(repoRequest);
         return listRepos().stream()
                 .filter(r -> r.repo().equals(repoRequest.name()))
                 .findFirst()
@@ -85,6 +99,7 @@ public class RepoService {
         return repoRepository.listRepos();
     }
 
+    @Transactional
     public RepositoryResponse updateRepo(String repoName, RepoRequest repoRequest) {
         String correctUrl = getReleaseApiUrl(repoRequest.githubUrl());
 
@@ -115,6 +130,7 @@ public class RepoService {
             );
         }
 
+        saveLinkedImage(repoRequest);
         return listRepos().stream()
                 .filter(r -> r.repo().equals(repoRequest.name()))
                 .findFirst()
@@ -122,6 +138,18 @@ public class RepoService {
                         HttpStatus.INTERNAL_SERVER_ERROR,
                         "Repository was updated but could not be retrieved."
                 ));
+    }
+
+    private void saveLinkedImage(RepoRequest request) {
+        String input = request.dockerImage();
+        if (input == null || input.isBlank()) {
+            dockerImages.deleteLinked(request.name());
+            return;
+        }
+        String image = DockerRegistryClient.normalizeImage(input);
+        String digest = dockerRegistryClient.fetchLatestDigest(image);
+        dockerImages.deleteLinked(request.name());
+        dockerImages.insert(new DockerImageRepository.TrackedImage(image, digest, request.dockerTemplate()), request.name());
     }
 
     public String getReleaseApiUrl(String githubUrl) {
@@ -156,32 +184,107 @@ public class RepoService {
             throw new RepoNotFoundException("Invalid Github repository "+ repoName);
         }
 
-        String currentRelease = githubClient.getRepository(repositoryResponse.repoUrl(), systemService.getSecret("GITHUB_API_KEY"));
-        String currentWrittenRelease = repoRepository.getLatestWrittenRelease(repoName).orElse(null);
-
-        if (!repositoryResponse.versionComparison().qualifies(currentRelease, currentWrittenRelease)){
-            return new IsLatestVersionResponse(false,null);
-        } else {
-            String jiraTicket = null;
-            if (repositoryResponse.templateName() != null && !repositoryResponse.templateName().isEmpty()) {
+        String currentRelease = null;
+        String digest = null;
+        RuntimeException fetchFailure = null;
+        String image = repositoryResponse.dockerImage();
+        try {
+            currentRelease = githubClient.getRepository(repositoryResponse.repoUrl(), systemService.getSecret("GITHUB_API_KEY"));
+        } catch (RuntimeException e) {
+            if (image == null) throw e;
+            fetchFailure = e;
+        }
+        boolean repoChanged = currentRelease != null && repositoryResponse.versionComparison().qualifies(
+                currentRelease, repoRepository.getLatestWrittenRelease(repoName).orElse(null));
+        if (image != null) {
+            try {
+                digest = dockerRegistryClient.fetchLatestDigest(image);
+            } catch (RuntimeException e) {
+                if (fetchFailure == null) fetchFailure = e;
+                else if (fetchFailure != e) fetchFailure.addSuppressed(e);
+            }
+        }
+        boolean dockerChanged = digest != null && !Objects.equals(digest, repositoryResponse.dockerDigest());
+        String jiraTicket = null;
+        if (repoChanged) {
+            // GitHub takes ticket precedence when both sources change. Advance neither state if its ticket fails.
+            if (hasTemplate(repositoryResponse.templateName())) {
                 jiraTicket = jiraService.createJiraTicket(repositoryResponse.templateName(), repoName, currentRelease, repositoryResponse.repoUrl());
             }
             repoRepository.writeLatestRelease(repoName, currentRelease);
-            return new IsLatestVersionResponse(true, jiraTicket);
+            if (dockerChanged) dockerImages.writeDigest(image, digest);
+        } else if (dockerChanged) {
+            jiraTicket = processDockerDigestChange(image, repositoryResponse.dockerDigest(), digest, repositoryResponse.dockerTemplate()).jiraTicket();
+        } else if (fetchFailure != null) {
+            throw fetchFailure;
+        }
+        return new IsLatestVersionResponse(repoChanged || dockerChanged, jiraTicket);
+    }
+
+    private IsLatestVersionResponse processDockerDigestChange(String image, String storedDigest, String digest, String template) {
+        boolean changed = !Objects.equals(digest, storedDigest);
+        String ticket = null;
+        if (changed) {
+            if (hasTemplate(template)) ticket = jiraService.createDockerJiraTicket(template, image, digest);
+            dockerImages.writeDigest(image, digest);
+        }
+        return new IsLatestVersionResponse(changed, ticket);
+    }
+
+    private boolean hasTemplate(String template) { return template != null && !template.isBlank(); }
+
+    public List<CheckRepoResultResponse> checkAllRepos() {
+        CompletableFuture<List<CheckRepoResultResponse>> cycle;
+        boolean startsCycle;
+        synchronized (checkCycleLock) {
+            startsCycle = activeCheckCycle == null;
+            if (startsCycle) activeCheckCycle = new CompletableFuture<>();
+            cycle = activeCheckCycle;
+        }
+        if (startsCycle) {
+            try {
+                List<CheckRepoResultResponse> results = runCheckCycle();
+                synchronized (checkCycleLock) {
+                    cycle.complete(results);
+                    activeCheckCycle = null;
+                }
+            } catch (Throwable failure) {
+                synchronized (checkCycleLock) {
+                    cycle.completeExceptionally(failure);
+                    activeCheckCycle = null;
+                }
+            }
+        }
+        try {
+            return cycle.join();
+        } catch (CompletionException e) {
+            if (e.getCause() instanceof RuntimeException failure) throw failure;
+            if (e.getCause() instanceof Error failure) throw failure;
+            throw e;
         }
     }
 
-    public List<CheckRepoResultResponse> checkAllRepos(){
+    private List<CheckRepoResultResponse> runCheckCycle() {
         List<RepositoryResponse> repos = listRepos();
 
-        return repos.parallelStream().map(repo -> {
+        var results = new java.util.ArrayList<>(repos.parallelStream().map(repo -> {
             try {
                 IsLatestVersionResponse result = isLatestVersion(repo.repo());
                 return new CheckRepoResultResponse(repo.repo(), result.updated(), result.jiraTicket(), null);
             } catch (Exception e) {
                 return new CheckRepoResultResponse(repo.repo(), false, null, true);
             }
-        }).toList();
+        }).toList());
+        for (var image : dockerImages.listStandalone()) {
+            try {
+                String digest = dockerRegistryClient.fetchLatestDigest(image.imageName());
+                var result = processDockerDigestChange(image.imageName(), image.manifestDigest(), digest, image.templateName());
+                results.add(new CheckRepoResultResponse(image.imageName(), result.updated(), result.jiraTicket(), null));
+            } catch (Exception e) {
+                results.add(new CheckRepoResultResponse(image.imageName(), false, null, true));
+            }
+        }
+        return results;
     }
 
 }

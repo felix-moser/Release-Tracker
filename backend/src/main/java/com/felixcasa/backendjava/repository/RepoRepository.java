@@ -3,9 +3,9 @@ package com.felixcasa.backendjava.repository;
 import com.felixcasa.backendjava.response.RepositoryResponse;
 import com.felixcasa.backendjava.model.VersionComparisonMode;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.simple.JdbcClient;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -14,6 +14,17 @@ import java.util.Optional;
 
 @Repository
 public class RepoRepository {
+
+    private static final RowMapper<RepositoryResponse> REPOSITORY_ROW_MAPPER = (rs, rowNum) ->
+            new RepositoryResponse(
+                    rs.getString("repo"),
+                    rs.getString("repo_url"),
+                    rs.getString("latest_tag"),
+                    rs.getString("template_name"),
+                    VersionComparisonMode.valueOf(rs.getString("version_comparison")),
+                    rs.getString("image_name"),
+                    rs.getString("manifest_digest"),
+                    rs.getString("docker_template"));
 
     private final JdbcClient jdbcClient;
 
@@ -82,16 +93,8 @@ public class RepoRepository {
 
     public List<RepositoryResponse> listRepos(){
         return this.jdbcClient
-                .sql("SELECT repo, repo_url, latest_tag, template_name, version_comparison FROM releases ORDER BY repo")
-                .query((rs, rowNum) ->
-                        new RepositoryResponse(
-                                rs.getString("repo"),
-                                rs.getString("repo_url"),
-                                rs.getString("latest_tag"),
-                                rs.getString("template_name"),
-                                VersionComparisonMode.valueOf(rs.getString("version_comparison"))
-                        )
-                )
+                .sql("SELECT r.*, d.image_name, d.manifest_digest, d.template_name AS docker_template FROM releases r LEFT JOIN docker_images d ON d.repo_name=r.repo ORDER BY r.repo")
+                .query(REPOSITORY_ROW_MAPPER)
                 .list();
     }
 
@@ -107,17 +110,9 @@ public class RepoRepository {
 
     public Optional<RepositoryResponse> listRepo(String repoName) {
         return this.jdbcClient
-                .sql("SELECT repo, repo_url, latest_tag, template_name, version_comparison FROM releases WHERE repo = :repo")
+                .sql("SELECT r.*, d.image_name, d.manifest_digest, d.template_name AS docker_template FROM releases r LEFT JOIN docker_images d ON d.repo_name=r.repo WHERE r.repo = :repo")
                 .param("repo", repoName)
-                .query((rs, rowNum) ->
-                        new RepositoryResponse(
-                                rs.getString("repo"),
-                                rs.getString("repo_url"),
-                                rs.getString("latest_tag"),
-                                rs.getString("template_name"),
-                                VersionComparisonMode.valueOf(rs.getString("version_comparison"))
-                        )
-                )
+                .query(REPOSITORY_ROW_MAPPER)
                 .optional();
     }
 }

@@ -70,7 +70,7 @@ public class JiraService {
         );
     }
 
-    private String toGithubReleaseWebUrl(String url) {
+    private static String toGithubReleaseWebUrl(String url) {
         if (url == null) {
             return "";
         }
@@ -80,20 +80,34 @@ public class JiraService {
     }
 
     public Map<String, Object> buildIssuePayload(TicketTemplateResponse template, String repo, String tag, String url) {
-        String repoStr = repo == null ? "" : repo;
-        String tagStr = tag == null ? "" : tag;
-        String urlStr = toGithubReleaseWebUrl(url);
+        return buildIssuePayload(template, TemplatePlaceholders.forGithub(repo, tag, url));
+    }
 
-        String summary = template.summary()
-                .replace("{repo}", repoStr)
-                .replace("{tag}", tagStr)
-                .replace("{url}", urlStr);
+    public Map<String, Object> buildDockerIssuePayload(TicketTemplateResponse template, String image, String digest) {
+        return buildIssuePayload(template, TemplatePlaceholders.forDocker(image, digest));
+    }
 
-        String descriptionText = template.description() == null ? "" : template.description();
-        descriptionText = descriptionText
-                .replace("{repo}", repoStr)
-                .replace("{tag}", tagStr)
-                .replace("{url}", urlStr);
+    private record TemplatePlaceholders(String repo, String tag, String url, String image, String digest) {
+        static TemplatePlaceholders forGithub(String repo, String tag, String url) {
+            return new TemplatePlaceholders(repo == null ? "" : repo, tag == null ? "" : tag,
+                    toGithubReleaseWebUrl(url), " ", " ");
+        }
+
+        static TemplatePlaceholders forDocker(String image, String digest) {
+            String hex = digest.startsWith("sha256:") ? digest.substring(7) : digest;
+            return new TemplatePlaceholders(" ", "latest", " ", image, hex.substring(0, Math.min(12, hex.length())));
+        }
+    }
+
+    private String render(String text, TemplatePlaceholders values) {
+        if (text == null) return "";
+        return text.replace("{repo}", values.repo()).replace("{tag}", values.tag()).replace("{url}", values.url())
+                .replace("{image}", values.image()).replace("{digest}", values.digest());
+    }
+
+    private Map<String, Object> buildIssuePayload(TicketTemplateResponse template, TemplatePlaceholders values) {
+        String summary = render(template.summary(), values);
+        String descriptionText = render(template.description(), values);
 
         Map<String, Object> fields = new HashMap<>();
         fields.put("project", Map.of("key", template.projectKey()));
@@ -165,6 +179,16 @@ public class JiraService {
         }
 
         Map<String, Object> payload = buildIssuePayload(template, repo, tag, url);
+        return submitTicket(template, payload);
+    }
+
+    public String createDockerJiraTicket(String templateName, String image, String digest) {
+        TicketTemplateResponse template = jiraRepository.getTicketTemplate(templateName)
+                .orElseThrow(() -> new TemplateNotFoundException("Template not found"));
+        return submitTicket(template, buildDockerIssuePayload(template, image, digest));
+    }
+
+    private String submitTicket(TicketTemplateResponse template, Map<String, Object> payload) {
         String baseUrl = systemService.getSecret("JIRA_URL").replaceAll("/+$", "");
         String issueKey = jiraClient.createIssue(payload, authHeader(), baseUrl);
 
