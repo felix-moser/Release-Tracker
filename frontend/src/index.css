@@ -57,7 +57,6 @@
   --spacing-3xl: 64px;
   --spacing-4xl: 96px;
   --spacing-section: 128px;
-  --actions-width: 212px;
 }
 
 * {
@@ -204,8 +203,8 @@ button:disabled {
   font-weight: 500;
   line-height: 20px;
   border-radius: var(--rounded-sm);
-  min-height: 44px;
-  padding: 8px 16px;
+  height: 32px;
+  padding: 0 12px;
 }
 .button-primary-sm:hover:not(:disabled) {
   opacity: 0.9;
@@ -219,8 +218,8 @@ button:disabled {
   font-weight: 500;
   line-height: 20px;
   border-radius: var(--rounded-sm);
-  min-height: 44px;
-  padding: 8px 16px;
+  height: 32px;
+  padding: 0 12px;
 }
 .button-ghost-sm:hover:not(:disabled) {
   background-color: var(--colors-canvas);
@@ -230,8 +229,8 @@ button:disabled {
   background-color: var(--colors-error);
   color: var(--colors-on-primary);
   border-radius: var(--rounded-sm);
-  min-height: 44px;
-  padding: 8px 16px;
+  height: 32px;
+  padding: 0 12px;
   font-size: 14px;
   font-weight: 500;
   line-height: 20px;
@@ -315,7 +314,6 @@ button:disabled {
 }
 .section-header > :first-child { min-width: 0; }
 .section-header-action {
-  width: var(--actions-width);
   max-width: 100%;
 }
 
@@ -390,7 +388,7 @@ th, td {
   vertical-align: middle;
   overflow-wrap: anywhere;
 }
-.table-actions-column { width: var(--actions-width); }
+.table-actions-column { width: 170px; }
 .table-actions { white-space: nowrap; }
 th {
   font-family: var(--font-mono);
