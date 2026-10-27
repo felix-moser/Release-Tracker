@@ -14,7 +14,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: backend-java
+        working-directory: backend
 
     env:
       SPRING_PROFILES_ACTIVE: test
