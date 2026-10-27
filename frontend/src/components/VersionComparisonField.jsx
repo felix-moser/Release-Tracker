@@ -13,8 +13,8 @@ export default function VersionComparisonField({ value, onChange }) {
       </Select>
       <p id={`${id}-help`} className="body-sm text-mute mt-xs">
         {value === 'HIGHER_ONLY'
-          ? 'Compare dot-separated numbers, ignoring one leading v or V. For example, 1.10 is higher than 1.9, and 1.2 equals 1.2.0. If either tag cannot be compared numerically, any exact tag difference counts as an update.'
-          : 'Any exact tag difference counts as an update, including lower versions and changes to the v or V prefix.'}
+          ? 'Higher numbers only, ignoring v/V. Non-numeric tags use exact comparison.'
+          : 'Any tag change counts, including lower versions.'}
       </p>
     </div>
   );
