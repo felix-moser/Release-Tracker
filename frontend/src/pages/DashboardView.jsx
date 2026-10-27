@@ -41,6 +41,7 @@ export default function DashboardView() {
         await api.createRepo(payload);
       }
       setEditRepoData(null);
+      setIsAddingRepo(false);
       fetchData();
     } catch (err) {
       alert(err.message);

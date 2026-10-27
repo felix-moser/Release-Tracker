@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../api';
 import { Button, Input, Select, Card, Modal } from '../components/ui';
+import VersionComparisonField from '../components/VersionComparisonField';
 
 export default function RepositoriesView() {
   const [repos, setRepos] = useState([]);
@@ -14,6 +15,7 @@ export default function RepositoriesView() {
   const [name, setName] = useState('');
   const [githubUrl, setGithubUrl] = useState('');
   const [template, setTemplate] = useState('');
+  const [versionComparison, setVersionComparison] = useState('ANY_DIFFERENT');
 
   const fetchReposAndTemplates = async () => {
     setLoading(true);
@@ -64,7 +66,8 @@ export default function RepositoriesView() {
       const payload = {
         name,
         github_url: githubUrl,
-        template: template || undefined
+        template: template || undefined,
+        version_comparison: versionComparison
       };
       
       if (editingRepoName) {
@@ -87,6 +90,7 @@ export default function RepositoriesView() {
     setName(repo.repo);
     setGithubUrl(repo.repo_url);
     setTemplate(repo.template_name || '');
+    setVersionComparison(repo.version_comparison || 'ANY_DIFFERENT');
     setIsModalOpen(true);
   }
 
@@ -95,6 +99,7 @@ export default function RepositoriesView() {
     setName('');
     setGithubUrl('');
     setTemplate(templates.length > 0 ? templates[0].name : '');
+    setVersionComparison('ANY_DIFFERENT');
     setIsModalOpen(true);
   }
 
@@ -176,6 +181,7 @@ export default function RepositoriesView() {
               </Select>
             )}
           </div>
+          <VersionComparisonField value={versionComparison} onChange={setVersionComparison} />
           <div className="flex justify-end gap-sm mt-md">
             <Button variant="ghost-sm" type="button" onClick={() => setIsModalOpen(false)}>Cancel</Button>
             <Button variant="primary" type="submit">{editingRepoName ? "Save Changes" : "Add"}</Button>

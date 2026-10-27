@@ -1,10 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Input, Select, Button } from './ui';
+import VersionComparisonField from './VersionComparisonField';
 
 export default function RepoModal({ isOpen, onClose, onSave, templates, initialData }) {
   const [name, setName] = useState('');
   const [githubUrl, setGithubUrl] = useState('');
   const [template, setTemplate] = useState('');
+  const [versionComparison, setVersionComparison] = useState('ANY_DIFFERENT');
+
+  useEffect(() => {
+    if (isOpen) {
+      setVersionComparison(initialData?.version_comparison || 'ANY_DIFFERENT');
+    }
+  }, [isOpen, initialData]);
 
   useEffect(() => {
     if (isOpen) {
@@ -19,7 +27,8 @@ export default function RepoModal({ isOpen, onClose, onSave, templates, initialD
     onSave({
       name,
       github_url: githubUrl,
-      template: template || undefined
+      template: template || undefined,
+      version_comparison: versionComparison
     }, initialData ? initialData.repo : null);
   };
 
@@ -49,6 +58,7 @@ export default function RepoModal({ isOpen, onClose, onSave, templates, initialD
             </Select>
           )}
         </div>
+        <VersionComparisonField value={versionComparison} onChange={setVersionComparison} />
         <div className="flex justify-end gap-sm mt-md">
           <Button variant="ghost-sm" type="button" onClick={onClose}>Cancel</Button>
           <Button variant="primary" type="submit">{initialData ? "Save Changes" : "Add"}</Button>
