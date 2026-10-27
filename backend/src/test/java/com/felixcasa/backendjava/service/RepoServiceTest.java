@@ -1,6 +1,7 @@
 package com.felixcasa.backendjava.service;
 
 import com.felixcasa.backendjava.client.GithubClient;
+import com.felixcasa.backendjava.model.VersionComparisonMode;
 import com.felixcasa.backendjava.repository.RepoRepository;
 import com.felixcasa.backendjava.request.RepoRequest;
 import com.felixcasa.backendjava.response.RepositoryResponse;
@@ -79,7 +80,7 @@ public class RepoServiceTest {
 
     @Test
     void listRepoShouldReturnAllRepos(){
-        List<RepositoryResponse> repoList = java.util.List.of(new RepositoryResponse("repo","url","tag","template"));
+        List<RepositoryResponse> repoList = java.util.List.of(new RepositoryResponse("repo","url","tag","template", VersionComparisonMode.ANY_DIFFERENT));
         when(repoRepository.listRepos()).thenReturn(repoList);
 
         List<RepositoryResponse> result = repoService.listRepos();
@@ -89,13 +90,13 @@ public class RepoServiceTest {
 
     @Test
     void createRepoShouldReturnRepositoryResponseWhenSuccessful(){
-        RepoRequest repoRequest = new RepoRequest("talos", "https://github.com/siderolabs/talos", "template");
+        RepoRequest repoRequest = new RepoRequest("talos", "https://github.com/siderolabs/talos", "template", VersionComparisonMode.ANY_DIFFERENT);
         String apiUrl = "https://api.github.com/repos/siderolabs/talos/releases/latest";
-        RepositoryResponse expected = new RepositoryResponse("talos", apiUrl, "v1.0.0", "template");
+        RepositoryResponse expected = new RepositoryResponse("talos", apiUrl, "v1.0.0", "template", VersionComparisonMode.ANY_DIFFERENT);
 
         when(systemService.getSecret("GITHUB_API_KEY")).thenReturn("api-key");
         when(githubClient.getRepository(apiUrl, "api-key")).thenReturn("v1.0.0");
-        when(repoRepository.addNewRepo("talos", apiUrl, "v1.0.0", "template")).thenReturn(true);
+        when(repoRepository.addNewRepo("talos", apiUrl, "v1.0.0", "template", VersionComparisonMode.ANY_DIFFERENT)).thenReturn(true);
         when(repoRepository.listRepos()).thenReturn(List.of(expected));
 
         RepositoryResponse result = repoService.createRepo(repoRequest);
@@ -105,7 +106,7 @@ public class RepoServiceTest {
 
     @Test
     void createRepoShouldThrowBadGatewayWhenNetworkErrorOccurs(){
-        RepoRequest repoRequest = new RepoRequest("talos", "https://github.com/siderolabs/talos", "template");
+        RepoRequest repoRequest = new RepoRequest("talos", "https://github.com/siderolabs/talos", "template", VersionComparisonMode.ANY_DIFFERENT);
         String apiUrl = "https://api.github.com/repos/siderolabs/talos/releases/latest";
 
         when(systemService.getSecret("GITHUB_API_KEY")).thenReturn("api-key");
@@ -122,12 +123,12 @@ public class RepoServiceTest {
 
     @Test
     void createRepoShouldThrowConflictWhenRepoAlreadyExists(){
-        RepoRequest repoRequest = new RepoRequest("talos", "https://github.com/siderolabs/talos", "template");
+        RepoRequest repoRequest = new RepoRequest("talos", "https://github.com/siderolabs/talos", "template", VersionComparisonMode.ANY_DIFFERENT);
         String apiUrl = "https://api.github.com/repos/siderolabs/talos/releases/latest";
 
         when(systemService.getSecret("GITHUB_API_KEY")).thenReturn("api-key");
         when(githubClient.getRepository(apiUrl, "api-key")).thenReturn("v1.0.0");
-        when(repoRepository.addNewRepo("talos", apiUrl, "v1.0.0", "template")).thenReturn(false);
+        when(repoRepository.addNewRepo("talos", apiUrl, "v1.0.0", "template", VersionComparisonMode.ANY_DIFFERENT)).thenReturn(false);
 
         ResponseStatusException exception = assertThrows(
                 ResponseStatusException.class,
@@ -140,13 +141,13 @@ public class RepoServiceTest {
 
     @Test
     void updateRepoShouldReturnRepositoryResponseWhenSuccessful(){
-        RepoRequest repoRequest = new RepoRequest("talos-new", "https://github.com/siderolabs/talos", "template");
+        RepoRequest repoRequest = new RepoRequest("talos-new", "https://github.com/siderolabs/talos", "template", VersionComparisonMode.ANY_DIFFERENT);
         String apiUrl = "https://api.github.com/repos/siderolabs/talos/releases/latest";
-        RepositoryResponse expected = new RepositoryResponse("talos-new", apiUrl, "v1.1.0", "template");
+        RepositoryResponse expected = new RepositoryResponse("talos-new", apiUrl, "v1.1.0", "template", VersionComparisonMode.ANY_DIFFERENT);
 
         when(systemService.getSecret("GITHUB_API_KEY")).thenReturn("api-key");
         when(githubClient.getRepository(apiUrl, "api-key")).thenReturn("v1.1.0");
-        when(repoRepository.updateRepo("talos", "talos-new", apiUrl, "v1.1.0", "template")).thenReturn(true);
+        when(repoRepository.updateRepo("talos", "talos-new", apiUrl, "v1.1.0", "template", VersionComparisonMode.ANY_DIFFERENT)).thenReturn(true);
         when(repoRepository.listRepos()).thenReturn(List.of(expected));
 
         RepositoryResponse result = repoService.updateRepo("talos", repoRequest);
@@ -156,7 +157,7 @@ public class RepoServiceTest {
 
     @Test
     void updateRepoShouldThrowBadGatewayWhenNetworkErrorOccurs(){
-        RepoRequest repoRequest = new RepoRequest("talos-new", "https://github.com/siderolabs/talos", "template");
+        RepoRequest repoRequest = new RepoRequest("talos-new", "https://github.com/siderolabs/talos", "template", VersionComparisonMode.ANY_DIFFERENT);
         String apiUrl = "https://api.github.com/repos/siderolabs/talos/releases/latest";
 
         when(systemService.getSecret("GITHUB_API_KEY")).thenReturn("api-key");
@@ -173,12 +174,12 @@ public class RepoServiceTest {
 
     @Test
     void updateRepoShouldThrowConflictWhenUpdateFails(){
-        RepoRequest repoRequest = new RepoRequest("talos-new", "https://github.com/siderolabs/talos", "template");
+        RepoRequest repoRequest = new RepoRequest("talos-new", "https://github.com/siderolabs/talos", "template", VersionComparisonMode.ANY_DIFFERENT);
         String apiUrl = "https://api.github.com/repos/siderolabs/talos/releases/latest";
 
         when(systemService.getSecret("GITHUB_API_KEY")).thenReturn("api-key");
         when(githubClient.getRepository(apiUrl, "api-key")).thenReturn("v1.1.0");
-        when(repoRepository.updateRepo("talos", "talos-new", apiUrl, "v1.1.0", "template")).thenReturn(false);
+        when(repoRepository.updateRepo("talos", "talos-new", apiUrl, "v1.1.0", "template", VersionComparisonMode.ANY_DIFFERENT)).thenReturn(false);
 
         ResponseStatusException exception = assertThrows(
                 ResponseStatusException.class,

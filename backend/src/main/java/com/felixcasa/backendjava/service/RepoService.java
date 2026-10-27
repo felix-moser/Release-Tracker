@@ -13,10 +13,8 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 @Service
 public class RepoService {
@@ -51,7 +49,8 @@ public class RepoService {
                 repoRequest.name(),
                 correctUrl,
                 latestRelease,
-                repoRequest.template()
+                repoRequest.template(),
+                repoRequest.versionComparison()
         );
 
         if (!success) {
@@ -105,7 +104,8 @@ public class RepoService {
                 repoRequest.name(),
                 correctUrl,
                 latestRelease,
-                repoRequest.template()
+                repoRequest.template(),
+                repoRequest.versionComparison()
         );
 
         if (!success) {
@@ -153,8 +153,7 @@ public class RepoService {
         String currentRelease = githubClient.getRepository(repositoryResponse.repoUrl(), systemService.getSecret("GITHUB_API_KEY"));
         String currentWrittenRelease = repoRepository.getLatestWrittenRelease(repoName).orElse(null);
 
-        //Reminder Change is Latest version to accept jira ticket
-        if (Objects.equals(currentRelease, currentWrittenRelease)){
+        if (!repositoryResponse.versionComparison().qualifies(currentRelease, currentWrittenRelease)){
             return new IsLatestVersionResponse(false,null);
         } else {
             String jiraTicket = null;
