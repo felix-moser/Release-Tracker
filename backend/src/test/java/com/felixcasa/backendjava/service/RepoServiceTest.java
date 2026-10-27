@@ -35,6 +35,9 @@ public class RepoServiceTest {
     @Mock
     private JiraService jiraService;
 
+    @Mock private com.felixcasa.backendjava.repository.DockerImageRepository dockerImages;
+    @Mock private com.felixcasa.backendjava.client.DockerRegistryClient dockerRegistryClient;
+
     @InjectMocks
     private RepoService repoService;
 

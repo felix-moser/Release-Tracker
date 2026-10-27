@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Hero, Button, Card } from '../components/ui';
+import { Button, Card } from '../components/ui';
 import { api } from '../api';
 import { Link } from 'react-router-dom';
 import RepoModal from '../components/RepoModal';
 import TemplateModal from '../components/TemplateModal';
+import DockerImagesSection, { shortDigest } from '../components/DockerImagesSection';
 
 export default function DashboardView() {
   const [repos, setRepos] = useState([]);
@@ -66,37 +67,13 @@ export default function DashboardView() {
     return <div className="container mt-xl text-center" style={{ color: 'var(--colors-mute)' }}>Loading dashboard...</div>;
   }
 
-  // If no repos exist, show the getting started view
-  if (repos.length === 0) {
-    return (
-      <div>
-        <Hero />
-        <div className="container mt-xl">
-          <h2 className="heading-lg mb-md text-center">Getting Started</h2>
-          <div className="grid grid-cols-2 gap-lg" style={{ maxWidth: '800px', margin: '0 auto' }}>
-            <div className="feature-card flex-col items-center justify-center text-center">
-              <h3 className="heading-md mb-xs">1. Create a Template</h3>
-              <p className="body-md mb-md" style={{ color: 'var(--colors-body)' }}>Define the Jira ticket structure you want to create when a new release is detected.</p>
-              <Link to="/templates"><Button variant="primary-sm">Go to Templates</Button></Link>
-            </div>
-            <div className="feature-card flex-col items-center justify-center text-center">
-              <h3 className="heading-md mb-xs">2. Track a Repository</h3>
-              <p className="body-md mb-md" style={{ color: 'var(--colors-body)' }}>Link a GitHub repository to your template and let Release Tracker do the rest.</p>
-              <Link to="/repos"><Button variant="primary-sm">Go to Repositories</Button></Link>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   // Otherwise, show the populated dashboard
   return (
     <div>
       <div className="hero-band flex-col items-center justify-center" style={{ padding: 'var(--spacing-3xl) var(--spacing-lg)' }}>
         <h1 className="display-xl mb-md">Dashboard</h1>
         <p className="body-lg" style={{ color: 'var(--colors-body)' }}>
-          Overview of your tracked repositories and templates.
+          Overview of your tracked repositories, Docker images, and templates.
         </p>
       </div>
       
@@ -119,6 +96,7 @@ export default function DashboardView() {
                 <p className="body-md mb-md" style={{ color: 'var(--colors-mute)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={repo.repo_url}>
                   {repo.repo_url.replace('https://api.github.com/repos/', '').replace('/releases/latest', '')}
                 </p>
+                {repo.docker_image && <p className="body-sm mb-md" title={repo.docker_digest}>Docker: {repo.docker_image}:latest · {shortDigest(repo.docker_digest)}</p>}
                 <div className="mt-auto pt-md" style={{ borderTop: '1px solid var(--colors-hairline)' }}>
                   <span className="label-sm" style={{ color: 'var(--colors-mute)' }}>Linked Template: </span>
                   <span className="body-sm">{repo.template_name || 'None'}</span>
@@ -133,6 +111,8 @@ export default function DashboardView() {
             </Card>
           </div>
         </div>
+
+        <DockerImagesSection templates={templates} />
 
         <div className="flex justify-between items-center mb-lg flex-col-mobile gap-sm">
           <h2 className="heading-lg">Templates Summary</h2>

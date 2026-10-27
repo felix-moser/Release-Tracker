@@ -1,4 +1,21 @@
+async function request(path, method = 'GET', body) {
+  const res = await fetch(path, { method, headers: { 'Content-Type': 'application/json' },
+    ...(body === undefined ? {} : { body: JSON.stringify(body) }) });
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}));
+    throw new Error(error.detail || `Request failed (${res.status})`);
+  }
+  return res.json();
+}
+
 export const api = {
+  getDockerImages: () => request('/api/docker-images'),
+  createDockerImage: image => request('/api/docker-images', 'POST', image),
+  updateDockerImage: (original, image) => request(`/api/docker-images?image_name=${encodeURIComponent(original)}`, 'PUT', image),
+  deleteDockerImage: image => request(`/api/docker-images?image_name=${encodeURIComponent(image)}`, 'DELETE'),
+  getRegistries: () => request('/api/system/registries'),
+  saveRegistry: credential => request('/api/system/registries', 'POST', credential),
+  deleteRegistry: registry => request(`/api/system/registries?registry=${encodeURIComponent(registry)}`, 'DELETE'),
   async getRepos() {
     const res = await fetch('/api/repos');
     if (!res.ok) throw new Error(await res.text());

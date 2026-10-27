@@ -49,6 +49,25 @@ public class JiraServiceTest {
 
 
     @Test
+    void dockerTicketsUseLatestAndShortDigestAndBlankGithubPlaceholders() {
+        var template = new TicketTemplateResponse("mixed", "P", "Task",
+                "{repo}|{tag}|{url}|{image}|{digest}", "{image}|{digest}", "", "", "", "", "");
+        var fields = (Map<String, Object>) jiraService.buildDockerIssuePayload(template, "ghcr.io/owner/app",
+                "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef").get("fields");
+        assertThat(fields.get("summary")).isEqualTo(" |latest| |ghcr.io/owner/app|0123456789ab");
+        assertThat(fields.get("description")).isEqualTo(jiraService.toAdf("ghcr.io/owner/app|0123456789ab"));
+    }
+
+    @Test
+    void githubTicketsBlankDockerPlaceholders() {
+        var template = new TicketTemplateResponse("mixed", "P", "Task",
+                "{repo}|{tag}|{url}|{image}|{digest}", "{image}|{digest}", "", "", "", "", "");
+        var fields = (Map<String, Object>) jiraService.buildIssuePayload(template, "app", "v2", "https://example.com").get("fields");
+        assertThat(fields.get("summary")).isEqualTo("app|v2|https://example.com| | ");
+        assertThat(fields.get("description")).isEqualTo(jiraService.toAdf(" | "));
+    }
+
+    @Test
     void authHeaderShouldReturnBase64EncodedString() {
         when(systemService.getSecret("JIRA_EMAIL")).thenReturn("test@test.com");
         when(systemService.getSecret("JIRA_API_TOKEN")).thenReturn("token");

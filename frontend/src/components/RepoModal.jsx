@@ -6,6 +6,8 @@ export default function RepoModal({ isOpen, onClose, onSave, templates, initialD
   const [name, setName] = useState('');
   const [githubUrl, setGithubUrl] = useState('');
   const [template, setTemplate] = useState('');
+  const [dockerImage, setDockerImage] = useState('');
+  const [dockerTemplate, setDockerTemplate] = useState('');
   const [versionComparison, setVersionComparison] = useState('ANY_DIFFERENT');
 
   useEffect(() => {
@@ -16,6 +18,8 @@ export default function RepoModal({ isOpen, onClose, onSave, templates, initialD
 
   useEffect(() => {
     if (isOpen) {
+      setDockerImage(initialData?.docker_image || '');
+      setDockerTemplate(initialData?.docker_template || '');
       setName(initialData ? initialData.repo : '');
       setGithubUrl(initialData ? initialData.repo_url : '');
       setTemplate(initialData ? (initialData.template_name || '') : (templates.length > 0 ? templates[0].name : ''));
@@ -28,6 +32,8 @@ export default function RepoModal({ isOpen, onClose, onSave, templates, initialD
       name,
       github_url: githubUrl,
       template: template || undefined,
+      docker_image: dockerImage,
+      docker_template: dockerTemplate || null,
       version_comparison: versionComparison
     }, initialData ? initialData.repo : null);
   };
@@ -58,6 +64,17 @@ export default function RepoModal({ isOpen, onClose, onSave, templates, initialD
             </Select>
           )}
         </div>
+        <fieldset className="flex-col gap-sm border rounded-sm" style={{ padding: '12px' }}>
+          <legend className="label-sm">Docker Image (optional)</legend>
+          <label htmlFor="linked-docker-image" className="label-sm">Docker Image</label>
+          <Input id="linked-docker-image" value={dockerImage} onChange={e => setDockerImage(e.target.value)} placeholder="nginx or ghcr.io/owner/app" />
+          <p className="body-sm text-mute">Always tracks :latest. Any supplied tag or digest is stripped. Clear to unlink.</p>
+          <label htmlFor="linked-docker-template" className="label-sm">Docker Jira Template</label>
+          <Select id="linked-docker-template" value={dockerTemplate} onChange={e => setDockerTemplate(e.target.value)}>
+            <option value="">(None)</option>
+            {templates.map(t => <option key={t.name} value={t.name}>{t.name}</option>)}
+          </Select>
+        </fieldset>
         <VersionComparisonField value={versionComparison} onChange={setVersionComparison} />
         <div className="flex justify-end gap-sm mt-md">
           <Button variant="ghost-sm" type="button" onClick={onClose}>Cancel</Button>

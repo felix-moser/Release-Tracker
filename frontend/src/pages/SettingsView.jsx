@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../api';
+import RegistryCredentials from '../components/RegistryCredentials';
 import { Button, Input, Card } from '../components/ui';
 
 export default function SettingsView() {
@@ -204,6 +205,8 @@ export default function SettingsView() {
               </div>
             </form>
           </Card>
+
+          <RegistryCredentials />
 
           {/* Scheduler Configuration */}
           <Card>

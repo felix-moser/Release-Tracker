@@ -1,3 +1,4 @@
+import { TEMPLATE_PLACEHOLDER_HINT } from '../components/templatePlaceholders';
 import React, { useState, useEffect } from 'react';
 import { api } from '../api';
 import { Button, Input, Select, Card, Modal } from '../components/ui';
@@ -199,11 +200,11 @@ export default function TemplatesView() {
             </Select>
           </div>
           <div>
-            <label className="label-sm mb-xs display-block">Summary (Supports {`{repo}, {tag}, {url}`})</label>
+            <label className="label-sm mb-xs display-block">Summary ({TEMPLATE_PLACEHOLDER_HINT})</label>
             <Input value={summary} onChange={e => setSummary(e.target.value)} required />
           </div>
           <div>
-            <label className="label-sm mb-xs display-block">Description</label>
+            <label className="label-sm mb-xs display-block">Description ({TEMPLATE_PLACEHOLDER_HINT})</label>
             <textarea 
               className="text-input" 
               style={{ minHeight: '80px', resize: 'vertical' }}

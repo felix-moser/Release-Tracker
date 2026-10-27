@@ -1,5 +1,7 @@
 spring:
   datasource:
+    hikari:
+      connection-init-sql: "PRAGMA foreign_keys = ON;"
     url: jdbc:sqlite:${DB_PATH:/app/data/releases.db}
   jpa:
     database-platform: org.hibernate.community.dialect.SQLiteDialect
