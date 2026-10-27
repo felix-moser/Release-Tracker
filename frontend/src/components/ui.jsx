@@ -109,7 +109,7 @@ export function Footer() {
           <span className="mono-eyebrow">release-tracker</span>
         </div>
         <div className="flex gap-md text-sm text-mute">
-          <a href="https://github.com" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: 'inherit' }}>GitHub</a>
+          <a href="https://github.com/felix-moser/Release-Tracker" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: 'inherit' }}>GitHub</a>
         </div>
       </div>
     </footer>
