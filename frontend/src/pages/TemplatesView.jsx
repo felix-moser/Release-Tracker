@@ -143,7 +143,7 @@ export default function TemplatesView() {
           <h1 className="heading-lg">Jira Templates</h1>
           <p className="body-md text-mute">Manage issue blueprints for tracked releases.</p>
         </div>
-        <Button variant="primary" onClick={handleCreateClick}>Create Template</Button>
+        <Button variant="primary-sm" onClick={handleCreateClick}>Create Template</Button>
       </div>
 
       {error && <div className="mb-md body-sm" style={{ color: 'var(--colors-error)' }}>Error: {error}</div>}
@@ -153,12 +153,12 @@ export default function TemplatesView() {
       ) : templates.length === 0 ? (
         <Card className="text-center py-xl">
           <p className="body-lg mb-sm">No templates found.</p>
-          <Button variant="secondary" onClick={handleCreateClick}>Create your first template</Button>
+          <Button variant="ghost-sm" onClick={handleCreateClick}>Create your first template</Button>
         </Card>
       ) : (
         <div className="grid grid-cols-2 gap-md">
           {templates.map(tpl => (
-            <Card key={tpl.name} elevated>
+            <Card key={tpl.name}>
               <div className="flex justify-between items-center mb-sm">
                 <h3 className="heading-md">{tpl.name}</h3>
                 <span className="mono-eyebrow">{tpl.project_key}</span>
@@ -171,7 +171,7 @@ export default function TemplatesView() {
                 <span className="body-sm text-mute border px-xs rounded-sm">{tpl.issue_type}</span>
                 {tpl.priority && <span className="body-sm text-mute border px-xs rounded-sm">{tpl.priority}</span>}
               </div>
-              <div className="mt-md flex justify-end gap-sm">
+              <div className="mt-md flex flex-wrap justify-end gap-sm">
                 <Button variant="ghost-sm" onClick={() => handleEditClick(tpl)}>Edit</Button>
                 <Button variant="ghost-sm" onClick={() => handleTest(tpl.name)}>Test Message</Button>
                 <Button variant="danger" onClick={() => handleDelete(tpl.name)}>Delete</Button>
@@ -244,7 +244,7 @@ export default function TemplatesView() {
           </div>
           <div className="flex justify-end gap-sm mt-md">
             <Button variant="ghost-sm" type="button" onClick={() => setIsModalOpen(false)}>Cancel</Button>
-            <Button variant="primary" type="submit">{editingTemplateName ? "Save Changes" : "Create"}</Button>
+            <Button variant="primary-sm" type="submit">{editingTemplateName ? "Save Changes" : "Create"}</Button>
           </div>
         </form>
       </Modal>

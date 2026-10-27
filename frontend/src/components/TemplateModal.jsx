@@ -109,7 +109,7 @@ export default function TemplateModal({ isOpen, onClose, onSave, initialData }) 
         </div>
         <div className="flex justify-end gap-sm mt-md">
           <Button variant="ghost-sm" type="button" onClick={onClose}>Cancel</Button>
-          <Button variant="primary" type="submit">{initialData ? "Save Changes" : "Create"}</Button>
+          <Button variant="primary-sm" type="submit">{initialData ? "Save Changes" : "Create"}</Button>
         </div>
       </form>
     </Modal>

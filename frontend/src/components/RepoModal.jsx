@@ -52,7 +52,7 @@ export default function RepoModal({ isOpen, onClose, onSave, templates, initialD
         <div>
           <label className="label-sm mb-xs display-block">Jira Template</label>
           {templates.length === 0 ? (
-            <p className="body-sm text-mute border rounded-sm p-xs" style={{ padding: '8px' }}>
+            <p className="body-sm text-mute border rounded-sm p-xs">
               No templates available. You can create one in the Templates view.
             </p>
           ) : (
@@ -64,21 +64,25 @@ export default function RepoModal({ isOpen, onClose, onSave, templates, initialD
             </Select>
           )}
         </div>
-        <fieldset className="flex-col gap-sm border rounded-sm" style={{ padding: '12px' }}>
-          <legend className="label-sm">Docker Image (optional)</legend>
-          <label htmlFor="linked-docker-image" className="label-sm">Docker Image</label>
-          <Input id="linked-docker-image" value={dockerImage} onChange={e => setDockerImage(e.target.value)} placeholder="nginx or ghcr.io/owner/app" />
-          <p className="body-sm text-mute">Always tracks :latest. Any supplied tag or digest is stripped. Clear to unlink.</p>
-          <label htmlFor="linked-docker-template" className="label-sm">Docker Jira Template</label>
-          <Select id="linked-docker-template" value={dockerTemplate} onChange={e => setDockerTemplate(e.target.value)}>
-            <option value="">(None)</option>
-            {templates.map(t => <option key={t.name} value={t.name}>{t.name}</option>)}
-          </Select>
-        </fieldset>
+        <div className="flex-col gap-md border rounded-sm" role="group" aria-labelledby="linked-docker-heading" style={{ padding: 'var(--spacing-md)', backgroundColor: 'var(--colors-canvas)' }}>
+          <h3 id="linked-docker-heading" className="label-sm">Docker Image (optional)</h3>
+          <div className="flex-col gap-xs">
+            <label htmlFor="linked-docker-image" className="label-sm mb-xs display-block">Docker Image</label>
+            <Input id="linked-docker-image" value={dockerImage} onChange={e => setDockerImage(e.target.value)} placeholder="nginx or ghcr.io/owner/app" />
+            <p className="body-sm text-mute">Always tracks :latest. Any supplied tag or digest is stripped. Clear to unlink.</p>
+          </div>
+          <div className="flex-col gap-xs">
+            <label htmlFor="linked-docker-template" className="label-sm mb-xs display-block">Docker Jira Template</label>
+            <Select id="linked-docker-template" value={dockerTemplate} onChange={e => setDockerTemplate(e.target.value)}>
+              <option value="">(None)</option>
+              {templates.map(t => <option key={t.name} value={t.name}>{t.name}</option>)}
+            </Select>
+          </div>
+        </div>
         <VersionComparisonField value={versionComparison} onChange={setVersionComparison} />
         <div className="flex justify-end gap-sm mt-md">
           <Button variant="ghost-sm" type="button" onClick={onClose}>Cancel</Button>
-          <Button variant="primary" type="submit">{initialData ? "Save Changes" : "Add"}</Button>
+          <Button variant="primary-sm" type="submit">{initialData ? "Save Changes" : "Add"}</Button>
         </div>
       </form>
     </Modal>

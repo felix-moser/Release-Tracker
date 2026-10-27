@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { api } from '../api';
 import { Button, Card } from '../components/ui';
 import RepoModal from '../components/RepoModal';
-import DockerImagesSection, { shortDigest } from '../components/DockerImagesSection';
+import DockerImagesSection from '../components/DockerImagesSection';
+import { shortDigest } from '../formatters';
 
 export default function RepositoriesView() {
   const [repos, setRepos] = useState([]);
@@ -39,10 +40,10 @@ export default function RepositoriesView() {
   return <div className="container mt-xl">
     <div className="flex justify-between items-center mb-lg flex-col-mobile gap-sm">
       <div><h1 className="heading-lg">Tracked Repositories</h1><p className="body-md text-mute">GitHub repositories monitored for new releases.</p></div>
-      <Button variant="primary" onClick={handleCreateClick}>Add Repository</Button>
+      <Button variant="primary-sm" onClick={handleCreateClick}>Add Repository</Button>
     </div>
-    {error && <p role="alert">{error}</p>}
-    {loading ? <p>Loading...</p> : repos.length === 0 ? <Card>No repositories tracked yet.</Card> : (
+    {error && <p role="alert" className="mb-md body-sm" style={{ color: 'var(--colors-error)' }}>{error}</p>}
+    {loading ? <p className="body-md text-mute">Loading...</p> : repos.length === 0 ? <Card className="text-center py-xl"><p className="body-md text-mute">No repositories tracked yet.</p></Card> : (
         <div className="table-container">
           <table>
             <thead>
@@ -64,7 +65,7 @@ export default function RepositoriesView() {
                   </td>
                   <td style={{ textAlign: 'center', verticalAlign: 'middle' }}><span className="mono-eyebrow px-xs border rounded-sm">{r.latest_tag || 'N/A'}</span></td>
                   <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>{r.template_name || '-'}</td>
-                  <td>{r.docker_image ? <><span>{r.docker_image}:latest</span><br /><span title={r.docker_digest}>{shortDigest(r.docker_digest)}</span></> : '-'}</td>
+                  <td>{r.docker_image ? <><strong>{r.docker_image}</strong> <span className="mono-eyebrow token-badge">:latest</span><br /><span className="mono-eyebrow" title={r.docker_digest}>{shortDigest(r.docker_digest) || '-'}</span></> : '-'}</td>
                   <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>
                     <div className="flex justify-center gap-sm">
                       <Button variant="ghost-sm" onClick={() => handleEditClick(r)}>Edit</Button>

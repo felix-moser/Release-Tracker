@@ -199,7 +199,7 @@ export default function SettingsView() {
               </div>
 
               <div className="flex mt-sm">
-                <Button variant="primary" type="submit" disabled={savingSecrets || touchedSecrets.size === 0}>
+                <Button variant="primary-sm" type="submit" disabled={savingSecrets || touchedSecrets.size === 0}>
                   {savingSecrets ? 'Saving...' : 'Update Credentials'}
                 </Button>
               </div>
@@ -233,7 +233,7 @@ export default function SettingsView() {
                 />
               </div>
               <div className="flex mt-sm">
-                <Button variant="primary" type="submit" disabled={saving}>
+                <Button variant="primary-sm" type="submit" disabled={saving}>
                   {saving ? 'Saving...' : 'Save Changes'}
                 </Button>
               </div>
