@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { api } from '../api';
 import { Button, Card, Input, Modal, Select } from './ui';
 import { shortDigest } from '../formatters';
@@ -61,22 +60,42 @@ export default function DockerImagesSection({ templates = [], layout = 'table', 
     {!open && error && <p role="alert" className="mb-md body-sm" style={{ color: 'var(--colors-error)' }}>{error}</p>}
     {loading ? <p className="body-md text-mute">Loading Docker images...</p> : layout === 'grid' ? (
       <div className="grid grid-cols-6 gap-lg">
-        {images.map(image => <Card key={image.image_name} className="col-span-2 flex-col">
-          <div className="flex justify-between items-center gap-sm mb-sm">
-            <h3 className="heading-md">{image.image_name}</h3>
-            <span className="mono-eyebrow token-badge">:latest</span>
+        {images.map(image => (
+          <div
+            key={image.image_name}
+            className="col-span-2"
+            role="button"
+            tabIndex={0}
+            onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); edit(image); } }}
+            onClick={() => edit(image)}
+            style={{ display: 'block', minWidth: 0 }}
+          >
+            <Card className="flex-col" style={{ height: '100%', cursor: 'pointer' }}>
+              <div className="flex justify-between items-center gap-sm mb-sm">
+                <h3 className="heading-md">{image.image_name}</h3>
+                <span className="mono-eyebrow token-badge">:latest</span>
+              </div>
+              <p className="mono-eyebrow mb-md" title={image.manifest_digest}>{shortDigest(image.manifest_digest) || 'No digest yet'}</p>
+              <div className="mt-auto pt-md" style={{ borderTop: '1px solid var(--colors-hairline)' }}>
+                <span className="label-sm" style={{ color: 'var(--colors-mute)' }}>Linked Template: </span>
+                <span className="body-sm">{image.template_name || 'None'}</span>
+              </div>
+            </Card>
           </div>
-          <p className="mono-eyebrow mb-md" title={image.manifest_digest}>{shortDigest(image.manifest_digest) || 'No digest yet'}</p>
-          <div className="mt-auto pt-md border-top">
-            <span className="label-sm text-mute">Linked Template: </span>
-            {image.template_name ? <Link className="body-sm" to={`/templates?edit=${encodeURIComponent(image.template_name)}`}>{image.template_name}</Link> : <span className="body-sm">None</span>}
-            <div className="flex justify-end mt-sm"><Button variant="ghost-sm" onClick={() => edit(image)}>Edit</Button></div>
-          </div>
-        </Card>)}
-        <button type="button" className="feature-card add-card col-span-1 flex-col text-center" onClick={() => edit(null)}>
-          <span className="heading-lg text-mute">+</span>
-          <span className="body-md text-mute">Add Docker Image</span>
-        </button>
+        ))}
+        <div
+          className="col-span-1"
+          role="button"
+          tabIndex={0}
+          onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); edit(null); } }}
+          onClick={() => edit(null)}
+          style={{ display: 'block', minWidth: 0 }}
+        >
+          <Card className="flex-col items-center justify-center text-center" style={{ height: '100%', cursor: 'pointer', border: '1px dashed var(--colors-mute)', backgroundColor: 'transparent', minHeight: '120px' }}>
+            <div className="heading-lg" style={{ color: 'var(--colors-mute)' }}>+</div>
+            <p className="body-md mt-xs" style={{ color: 'var(--colors-mute)' }}>Add Docker Image</p>
+          </Card>
+        </div>
       </div>
     ) : images.length === 0 ? <Card className="text-center py-xl"><p className="body-md text-mute">No standalone Docker images tracked yet.</p></Card> : (
       <div className="table-container"><table><thead><tr><th>Image</th><th className="text-center">Short digest</th><th className="text-center">Template</th><th className="text-center">Actions</th></tr></thead>
