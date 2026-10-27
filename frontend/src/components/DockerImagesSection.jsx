@@ -53,9 +53,9 @@ export default function DockerImagesSection({ templates = [], layout = 'table', 
     catch (e) { setError(e.message); }
   };
   return <section className="mt-xl mb-xl">
-    <div className="flex justify-between items-center mb-lg flex-col-mobile gap-sm">
+    <div className="section-header mb-lg">
       <div><h2 className="heading-lg">Docker Images</h2><p className="body-sm text-mute">Standalone Docker images tracking :latest.</p></div>
-      <Button variant="primary-sm" onClick={() => edit(null)}>Add Docker Image</Button>
+      <Button variant="primary-sm" className="section-header-action" onClick={() => edit(null)}>Add Docker Image</Button>
     </div>
     {!open && error && <p role="alert" className="mb-md body-sm" style={{ color: 'var(--colors-error)' }}>{error}</p>}
     {loading ? <p className="body-md text-mute">Loading Docker images...</p> : layout === 'grid' ? (
@@ -98,12 +98,12 @@ export default function DockerImagesSection({ templates = [], layout = 'table', 
         </div>
       </div>
     ) : images.length === 0 ? <Card className="text-center py-xl"><p className="body-md text-mute">No standalone Docker images tracked yet.</p></Card> : (
-      <div className="table-container"><table><thead><tr><th>Image</th><th className="text-center">Short digest</th><th className="text-center">Template</th><th className="text-center">Actions</th></tr></thead>
+      <div className="table-container"><table><colgroup><col /><col /><col /><col className="table-actions-column" /></colgroup><thead><tr><th>Image</th><th className="text-center">Short digest</th><th className="text-center">Template</th><th className="table-actions">Actions</th></tr></thead>
         <tbody>{images.map(image => <tr key={image.image_name}>
           <td><strong>{image.image_name}</strong> <span className="mono-eyebrow token-badge">:latest</span></td>
           <td className="text-center" title={image.manifest_digest}><span className="mono-eyebrow token-badge">{shortDigest(image.manifest_digest) || '-'}</span></td>
           <td className="text-center">{image.template_name || '-'}</td>
-          <td><div className="flex justify-center gap-sm"><Button variant="ghost-sm" onClick={() => edit(image)}>Edit</Button><Button variant="danger" onClick={() => remove(image.image_name)}>Remove</Button></div></td>
+          <td className="table-actions"><div className="flex justify-center gap-sm"><Button variant="ghost-sm" onClick={() => edit(image)}>Edit</Button><Button variant="danger" onClick={() => remove(image.image_name)}>Remove</Button></div></td>
         </tr>)}</tbody></table></div>
     )}
     <Modal isOpen={open} onClose={() => setOpen(false)} title={editing ? 'Edit Docker Image' : 'Add Docker Image'}>

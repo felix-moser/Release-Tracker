@@ -72,14 +72,14 @@ export default function RegistryCredentials() {
 
   return (
     <Card>
-      <div className="flex justify-between items-center mb-md flex-col-mobile gap-sm">
+      <div className="section-header mb-md">
         <div>
           <h2 className="heading-md mb-xs">Container Registry Credentials</h2>
           <p className="body-sm text-mute">
             Configure credentials for Docker Hub, GHCR, and other private registries.
           </p>
         </div>
-        <Button variant="primary-sm" type="button" onClick={openCreateModal}>
+        <Button variant="primary-sm" className="section-header-action" type="button" onClick={openCreateModal}>
           Add Registry
         </Button>
       </div>
@@ -100,12 +100,13 @@ export default function RegistryCredentials() {
       ) : (
         <div className="table-container">
           <table>
+            <colgroup><col /><col /><col /><col className="table-actions-column" /></colgroup>
             <thead>
               <tr>
                 <th>Registry</th>
                 <th>Username</th>
                 <th className="text-center">Token</th>
-                <th className="text-center">Actions</th>
+                <th className="table-actions">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -121,7 +122,7 @@ export default function RegistryCredentials() {
                       {r.token_set ? 'Configured' : 'Missing'}
                     </span>
                   </td>
-                  <td>
+                  <td className="table-actions">
                     <div className="flex justify-center gap-sm">
                       <Button variant="ghost-sm" type="button" onClick={() => openEditModal(r)}>
                         Edit

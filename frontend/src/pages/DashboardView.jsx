@@ -112,9 +112,9 @@ export default function DashboardView() {
       </div>
       
       <div className="container mt-xl mb-xl">
-        <div className="flex justify-between items-center mb-lg flex-col-mobile gap-sm">
+        <div className="section-header mb-lg">
           <h2 className="heading-lg">Active Repositories</h2>
-          <Link to="/repos" className="button-primary-sm">Manage Repositories</Link>
+          <Link to="/repos" className="button-primary-sm section-header-action">Manage Repositories</Link>
         </div>
         
         <div className="grid grid-cols-6 gap-lg mb-xl">
@@ -148,9 +148,9 @@ export default function DashboardView() {
 
         <DockerImagesSection templates={templates} layout="grid" images={images} onImagesChange={setImages} />
 
-        <div className="flex justify-between items-center mb-lg flex-col-mobile gap-sm">
+        <div className="section-header mb-lg">
           <h2 className="heading-lg">Templates Summary</h2>
-          <Link to="/templates" className="button-primary-sm">Manage Templates</Link>
+          <Link to="/templates" className="button-primary-sm section-header-action">Manage Templates</Link>
         </div>
         
         <div className="grid grid-cols-6 gap-md mb-xl">

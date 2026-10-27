@@ -38,35 +38,36 @@ export default function RepositoriesView() {
     } catch (e) { alert(e.message); }
   };
   return <div className="container mt-xl">
-    <div className="flex justify-between items-center mb-lg flex-col-mobile gap-sm">
+    <div className="section-header mb-lg">
       <div><h1 className="heading-lg">Tracked Repositories</h1><p className="body-md text-mute">GitHub repositories monitored for new releases.</p></div>
-      <Button variant="primary-sm" onClick={handleCreateClick}>Add Repository</Button>
+      <Button variant="primary-sm" className="section-header-action" onClick={handleCreateClick}>Add Repository</Button>
     </div>
     {error && <p role="alert" className="mb-md body-sm" style={{ color: 'var(--colors-error)' }}>{error}</p>}
     {loading ? <p className="body-md text-mute">Loading...</p> : repos.length === 0 ? <Card className="text-center py-xl"><p className="body-md text-mute">No repositories tracked yet.</p></Card> : (
         <div className="table-container">
-          <table>
+          <table className="repositories-table">
+            <colgroup><col /><col /><col /><col /><col /><col className="table-actions-column" /></colgroup>
             <thead>
               <tr>
-                <th style={{ textAlign: 'center' }}>Name</th>
-                <th style={{ textAlign: 'center' }}>GitHub URL</th>
-                <th style={{ textAlign: 'center' }}>Latest Tag</th>
-                <th style={{ textAlign: 'center' }}>Template</th>
+                <th>Name</th>
+                <th>GitHub URL</th>
+                <th>Latest Tag</th>
+                <th>Template</th>
                 <th>Linked Docker image</th>
-                <th style={{ textAlign: 'center' }}>Actions</th>
+                <th className="table-actions">Actions</th>
               </tr>
             </thead>
             <tbody>
               {repos.map(r => (
                 <tr key={r.repo}>
-                  <td style={{ textAlign: 'center', verticalAlign: 'middle' }}><strong>{r.repo}</strong></td>
-                  <td className="body-sm" style={{ textAlign: 'center', verticalAlign: 'middle', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '200px' }} title={r.repo_url}>
+                  <td><strong>{r.repo}</strong></td>
+                  <td className="body-sm" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '200px' }} title={r.repo_url}>
                     {r.repo_url.replace('https://api.github.com/repos/', '').replace('/releases/latest', '')}
                   </td>
-                  <td style={{ textAlign: 'center', verticalAlign: 'middle' }}><span className="mono-eyebrow px-xs border rounded-sm">{r.latest_tag || 'N/A'}</span></td>
-                  <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>{r.template_name || '-'}</td>
+                  <td><span className="mono-eyebrow px-xs border rounded-sm">{r.latest_tag || 'N/A'}</span></td>
+                  <td>{r.template_name || '-'}</td>
                   <td>{r.docker_image ? <><strong>{r.docker_image}</strong> <span className="mono-eyebrow token-badge">:latest</span><br /><span className="mono-eyebrow" title={r.docker_digest}>{shortDigest(r.docker_digest) || '-'}</span></> : '-'}</td>
-                  <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>
+                  <td className="table-actions">
                     <div className="flex justify-center gap-sm">
                       <Button variant="ghost-sm" onClick={() => handleEditClick(r)}>Edit</Button>
                       <Button variant="danger" onClick={() => handleDelete(r.repo)}>Remove</Button>

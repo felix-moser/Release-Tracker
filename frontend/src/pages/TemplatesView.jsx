@@ -138,12 +138,12 @@ export default function TemplatesView() {
 
   return (
     <div className="container mt-xl">
-      <div className="flex justify-between items-center mb-lg flex-col-mobile gap-sm">
+      <div className="section-header mb-lg">
         <div>
           <h1 className="heading-lg">Jira Templates</h1>
           <p className="body-md text-mute">Manage issue blueprints for tracked releases.</p>
         </div>
-        <Button variant="primary-sm" onClick={handleCreateClick}>Create Template</Button>
+        <Button variant="primary-sm" className="section-header-action" onClick={handleCreateClick}>Create Template</Button>
       </div>
 
       {error && <div className="mb-md body-sm" style={{ color: 'var(--colors-error)' }}>Error: {error}</div>}
