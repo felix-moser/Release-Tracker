@@ -173,6 +173,21 @@ class VersionComparisonApiTest {
         assertThat(tickets).isEmpty();
     }
 
+    @Test
+    void repositoryReturnedToFrontendCanBeEditedWithItsStoredUrl() {
+        var created = request("POST", "/api/repos", repositoryBody("ANY_DIFFERENT"), 201);
+        var body = new LinkedHashMap<>(repositoryBody("HIGHER_ONLY"));
+        body.put("github_url", created.path("repo_url").asText());
+        fetchedTag.set("v2");
+
+        var edited = request("PUT", "/api/repos/alpha", body, 200);
+
+        assertThat(edited.path("version_comparison").asText()).isEqualTo("HIGHER_ONLY");
+        assertThat(edited.path("repo_url").asText()).isEqualTo(created.path("repo_url").asText());
+        assertThat(listedRepository().path("latest_tag").asText()).isEqualTo("v2");
+        assertThat(tickets).isEmpty();
+    }
+
     Map<String, Object> repositoryBody(String mode) {
         return Map.of("name", "alpha", "github_url", "https://github.com/example/alpha", "template", "issue", "version_comparison", mode);
     }

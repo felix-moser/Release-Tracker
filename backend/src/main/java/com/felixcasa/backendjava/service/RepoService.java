@@ -125,9 +125,15 @@ public class RepoService {
     }
 
     public String getReleaseApiUrl(String githubUrl) {
-        String path = URI.create(githubUrl).getPath().replaceAll("^/+|/+$",
+        URI uri = URI.create(githubUrl);
+        String path = uri.getPath().replaceAll("^/+|/+$",
                 "");
         String[] parts = path.split("/");
+
+        if ("api.github.com".equalsIgnoreCase(uri.getHost()) && parts.length == 5
+                && "repos".equals(parts[0]) && "releases".equals(parts[3]) && "latest".equals(parts[4])) {
+            parts = new String[]{parts[1], parts[2]};
+        }
 
         if (parts.length != 2) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid Github repository URL: "+ githubUrl);
